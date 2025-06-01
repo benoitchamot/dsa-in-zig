@@ -10,8 +10,31 @@ const Node = struct {
     }
 };
 
+// FIX THIS: this is probably not the right way to return the pointer I need
+pub fn createNode(allocator: *const std.mem.Allocator, value: u8) !*Node {
+
+    const node: Node = .{
+        .value = value,
+    };
+
+    // create = Returns a pointer to undefined memory. 
+    // Call destroy with the result to free the memory
+    const ptr = try allocator.create(Node);
+    ptr.* = node;
+
+    return ptr;
+}
+
 
 pub fn main() void {
+
+
+    // initialize the allocator
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    // initialize the allocator
+    const allocator = arena.allocator();
 
     var node1: Node = .{
         .value = 42,
@@ -33,6 +56,7 @@ pub fn main() void {
     node1.next = &node2;
     node2.next = &node3;
     node3.next = &node4;
+    node4.next = createNode(&allocator, 9);
 
     // Go through the nodes
     var count: u8 = 1;
